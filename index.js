@@ -9,37 +9,29 @@ const sbisec = {
 const date = moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
 
 async function login(page) {
-  await page.goto(sbisec.loginUrl);
-  const loginButton = '.ov';
-  await page.waitForSelector(loginButton);
+  await page.goto(sbisec.loginUrl, {waitUntil: 'networkidle2'});
 
   await page.type('#user_input > input', `${process.env.SBISEC_USERNAME}`);
   await page.type('#password_input > input', `${process.env.SBISEC_PASSWORD}`);
-  await page.click(loginButton);
+  await page.click('.ov'); // login button
 }
 
-async function showMessageBox(page) {
-  await page.goto(sbisec.messageBoxUrl);
+async function getUnreadMessages(page) {
+  await page.goto(sbisec.messageBoxUrl, {waitUntil: 'networkidle2'});
 
-  const unreadMessagesSelector = 'form > table:nth-of-type(2) table';
-  await page.waitForSelector(unreadMessagesSelector);
+  const unreadMessagesSelector = 'form > table:nth-of-type(2) table[width="100%"] a';
+  const result = await page.$$eval(unreadMessagesSelector, unreadMessages => {
+    let list = [];
+    for (let i = 0; unreadMessages.length > i; i++) {
+      list.push({
+        href: unreadMessages[i].href,
+        text: unreadMessages[i].textContent
+      })
+    }
+    return list
+  });
 
-  const unreadMessages = await page.$$(unreadMessagesSelector);
-  if (unreadMessages.length == 0) {
-    return;
-  }
-
-  await page.screenshot({path: date + '_.png'}); // for debug
-
-  // ページ読み込み完了まで待つ
-  // await page.waitForSelector('p.m-txtAreaR');
-  //
-  // const title = await page.$('.m-hdr1.ng-star-inserted', node => node.innerText);
-  // console.log(title);
-  // const datetime = await page.$('.m-txtAreaR.ng-star-inserted', node => node.innerText);
-  // console.log(datetime);
-  // const text = await page.$('p.m-txtAreaR', node => node.innerText);
-  // console.log(text);
+  return result
 }
 
 (async () => {
@@ -48,7 +40,8 @@ async function showMessageBox(page) {
 
   await login(page);
   await page.screenshot({path: 'afterlogin.png'});
-  await showMessageBox(page);
+  const unreadMessages = await getUnreadMessages(page);
+  console.log(unreadMessages);
   // await captureAllPortfolio(page, 'service/portfolio', '.section-frame');
 
   await browser.close();
