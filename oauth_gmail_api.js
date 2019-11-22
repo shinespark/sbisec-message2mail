@@ -2,8 +2,10 @@ const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
 
+
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
+// const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/gmail.send'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -13,7 +15,8 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Gmail API.
-  authorize(JSON.parse(content), listLabels);
+  // authorize(JSON.parse(content), listLabels);
+  authorize(JSON.parse(content), sendMessage,'test@gmail.com' ,'test@gmail.com' , '日本語', 'ああああ<br> aaa<br><hr>おおお');
 });
 
 /**
@@ -22,7 +25,7 @@ fs.readFile('credentials.json', (err, content) => {
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback) {
+function authorize(credentials, callback, from, to, title, body) {
   const {client_secret, client_id, redirect_uris} = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
     client_id, client_secret, redirect_uris[0]);
@@ -31,7 +34,8 @@ function authorize(credentials, callback) {
   fs.readFile(TOKEN_PATH, (err, token) => {
     if (err) return getNewToken(oAuth2Client, callback);
     oAuth2Client.setCredentials(JSON.parse(token));
-    callback(oAuth2Client);
+    callback(oAuth2Client, from, to, title, body);
+    // callback(oAuth2Client);
   });
 }
 
@@ -88,3 +92,42 @@ function listLabels(auth) {
     }
   });
 }
+
+function sendMessage(auth, from, to, title, body) {
+  const gmail = google.gmail({version: 'v1', auth});
+  // You can use UTF-8 encoding for the subject using the method below.
+  // You can also just use a plain string if you don't need anything fancy.
+  const subject = title
+  const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+  const messageParts = [
+    `From: sbisec-message2mail <${from}>`,
+    `To: my own <${to}>`,
+    'Content-Type: text/html; charset=utf-8',
+    'Content-Transfer-Encoding: 7bit',
+    'MIME-Version: 1.0',
+    `Subject: ${utf8Subject}`,
+    '',
+    `${body}`
+  ];
+  const message = messageParts.join('\n');
+
+  // The body needs to be base64url encoded.
+  const encodedMessage = Buffer.from(message)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  gmail.users.messages.send({
+    userId: 'me',
+    requestBody: {
+      raw: encodedMessage,
+    },
+  }).then((res) => {
+    console.log(res);
+    return res;
+  }).catch((e) => {
+    console.error(e);
+  });
+}
+
