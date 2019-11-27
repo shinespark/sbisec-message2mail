@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const puppeteer = require('puppeteer');
 const {google} = require('googleapis');
 require('dotenv').config();
@@ -11,9 +12,9 @@ const SBISEC = {
 // https://developers.google.com/gmail/api/quickstart/nodejs#step_3_set_up_the_sample
 // https://github.com/googleapis/google-api-nodejs-client/blob/master/samples/gmail/send.js
 const SCOPES = ['https://www.googleapis.com/auth/gmail.send'];
-const TOKEN_PATH = 'token.json';
+const TOKEN_PATH = path.join(__dirname, 'token.json');
 let auth;
-fs.readFile('credentials.json', (err, content) => {
+fs.readFile(path.join(__dirname, 'credentials.json'), (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   const {client_secret, client_id, redirect_uris} = JSON.parse(content).installed;
   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
