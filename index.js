@@ -1,8 +1,7 @@
 const fs = require('fs');
-const moment = require('moment');
 const puppeteer = require('puppeteer');
-const readline = require('readline');
 const {google} = require('googleapis');
+require('dotenv').config();
 
 const SBISEC = {
   "loginUrl": "https://site1.sbisec.co.jp/ETGate/",
@@ -21,7 +20,6 @@ fs.readFile('credentials.json', (err, content) => {
 
   // Check if we have previously stored a token.
   fs.readFile(TOKEN_PATH, (err, token) => {
-    if (err) return getNewToken(oAuth2Client, callback);
     oAuth2Client.setCredentials(JSON.parse(token));
     auth = oAuth2Client;
   });
@@ -32,7 +30,6 @@ async function login(page) {
 
   await page.type('#user_input > input', `${process.env.SBISEC_USERNAME}`);
   await page.type('#password_input > input', `${process.env.SBISEC_PASSWORD}`);
-  await page.screenshot({path: 'beforelogin.png'});
   await page.click('.ov'); // login button
 }
 
@@ -70,7 +67,7 @@ async function message2mail(page, url) {
   const res = await sendMail(subject, body);
   console.log(res.status);
   if (res && res.status === 200) {
-    // await page.click(submitSelector);
+    await page.click(submitSelector);
   }
 }
 
@@ -105,37 +102,11 @@ async function sendMail(subject, body) {
   });
 }
 
-function getNewToken(oAuth2Client, callback) {
-  const authUrl = oAuth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: SCOPES,
-  });
-  console.log('Authorize this app by visiting this url:', authUrl);
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  rl.question('Enter the code from that page here: ', (code) => {
-    rl.close();
-    oAuth2Client.getToken(code, (err, token) => {
-      if (err) return console.error('Error retrieving access token', err);
-      oAuth2Client.setCredentials(token);
-      // Store the token to disk for later program executions
-      fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-        if (err) return console.error(err);
-        console.log('Token stored to', TOKEN_PATH);
-      });
-      auth = oAuth2Client;
-    });
-  });
-}
-
 (async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
   await login(page);
-  await page.screenshot({path: 'afterlogin.png'});
 
   const unreadMessages = await getUnreadMessages(page);
   for await (unreadMessage of unreadMessages) {
