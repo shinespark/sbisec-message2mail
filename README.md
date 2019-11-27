@@ -22,6 +22,10 @@ $ yarn install
 
 ## 実行 
 
+下記のいずれかで実行可能
+
 ```sh
 $ node index.js
+$ yarn run message2mail
+$ yarn --cwd ./sbisec-message2mail/ message2mail # プロジェクトルートの外部から実行可能
 ```
