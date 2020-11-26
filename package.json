@@ -7,5 +7,8 @@
   },
   "scripts": {
     "message2mail": "node index.js"
+  },
+  "devDependencies": {
+    "eslint": "^7.14.0"
   }
 }
