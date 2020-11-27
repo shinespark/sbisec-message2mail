@@ -9,13 +9,6 @@ SBI証券の重要なお知らせ > 未確認 のメッセージを自動でGmai
 
 ## 下準備
 
-* [Node\.js Quickstart  \|  Gmail API  \|  Google Developers](https://developers.google.com/gmail/api/quickstart/nodejs) を参考に、Gmail APIが利用可能な状態にしておく
-  * credentials.json の配置
-  * token.json の配置
-      * ただし、 `SCOPES = ['https://www.googleapis.com/auth/gmail.send']` のSCOPEでtoken.jsonを取得しておく
-* [puppeteer/puppeteer: Headless Chrome Node\.js API](https://github.com/puppeteer/puppeteer) が利用可能な状態にしておく
-
-
 ```
 $ cp .env{.sample,}
 $ vi .env
@@ -23,6 +16,13 @@ $ vi .env
 $ yarn install
 ```
 
+* [Node\.js Quickstart  \|  Gmail API  \|  Google Developers](https://developers.google.com/gmail/api/quickstart/nodejs) を参考に、Gmail APIが利用可能な状態にしておく
+* [API とサービス - Google Cloud Platform](https://console.cloud.google.com/apis) からcredentials.json の取得と配置
+  * API とサービス > 認証情報 > 認証情報を作成 > OAuth クライアントID > デスクトップ アプリ で作成してclient_secret.jsonをcredentials.jsonとしてディレクトリ直下に配置します。
+* token.json の生成
+  * 初回実行時にOAuthの認証URLが出力されるのでアクセスし、画面に従って許可を行う
+  * token.json が配置されればOK
+  
 ## 実行 
 
 下記のいずれかで実行可能
