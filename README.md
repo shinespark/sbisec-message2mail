@@ -1,13 +1,15 @@
 # sbisec-message2mail
 
-SBI証券の重要なお知らせ > 未確認 のメッセージを自動でGmailへメール送信した上で確認済みにしてくれるスクリプトです。
+SBI証券の重要なお知らせ > 未確認 のメッセージを自動でGmailへメール送信した上で確認済みにしてくれるスクリプト
 
-実行するには下記の環境が必要です。
+実行するには下記の環境が必要
 * [Gmail API  \|  Google Developers](https://developers.google.com/gmail/api)
 * [puppeteer/puppeteer: Headless Chrome Node\.js API](https://github.com/puppeteer/puppeteer)
 
 
 ## 下準備
+
+.envファイルを作成し、必要情報を入力する
 
 ```
 $ cp .env{.sample,}
@@ -30,5 +32,5 @@ $ yarn install
 ```sh
 $ node index.js
 $ yarn run message2mail
-$ yarn --cwd ./sbisec-message2mail/ message2mail # プロジェクトルートの外部から実行可能
+$ yarn --cwd <絶対パス> message2mail # プロジェクトルートの外部から実行可能
 ```
