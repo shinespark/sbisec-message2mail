@@ -32,5 +32,10 @@ $ yarn install
 ```sh
 $ node index.js
 $ yarn run message2mail
-$ yarn --cwd <絶対パス> message2mail # プロジェクトルートの外部から実行可能
+```
+
+cron登録例
+
+```sh
+2 */3 * * * cd /<repository_path> && /<node_path>/bin/node index.js
 ```
